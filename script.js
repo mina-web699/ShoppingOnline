@@ -245,7 +245,7 @@ if (cancelAuthBtn) {
 }
 
 function verifyAdminPassword() {
-    if (passwordInput.value === "123456") { 
+    if (passwordInput.value === "1234567") { 
         showToast("أهلاً بك يا أدمن! تم فتح اللوحة بنجاح 🔓", true);
         authModal.style.display = 'none';
         if (adminPanel) {
