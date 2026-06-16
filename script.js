@@ -1,26 +1,4 @@
-// --- Initial Data ---
-let defaultProducts = [
-    {
-        name: "Apple Watch Series 9",
-        desc: "Advanced health features, powerful S9 chip, and a super-bright display.",
-        price: 399.00,
-        img: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=500&auto=format&fit=crop&q=60"
-    },
-    {
-        name: "Samsung Galaxy Watch 6",
-        desc: "Personalized HR zones, advanced sleep coaching, and sleek aluminum design.",
-        price: 299.00,
-        img: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=500&auto=format&fit=crop&q=60"
-    },
-    {
-        name: "Huawei Watch GT 4",
-        desc: "Stunning geometric design, up to 14 days of battery life, and pro-level tracking.",
-        price: 249.00,
-        img: "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=500&auto=format&fit=crop&q=60"
-    }
-];
-
-let productsData = JSON.parse(localStorage.getItem("productsData")) || defaultProducts;
+let productsData = JSON.parse(localStorage.getItem("productsData")) || [];
 
 // --- DOM Selection ---
 const productsSection = document.getElementById('our-pro');
