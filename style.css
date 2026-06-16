@@ -183,6 +183,26 @@ header nav a:hover::after {
 .checkout-btn:hover i {
     color: var(--pure-white); 
 }
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.remove-item-btn {
+    background: none;
+    border: none;
+    color: #ff3b30;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+
+.remove-item-btn:hover {
+    transform: scale(1.2);
+}
 
 /* --- Cart Modal --- */
 .cart-modal {
@@ -781,6 +801,8 @@ h4 {
     50% { transform: scale(1.2); }
     100% { transform: scale(1); }
 }
+
+
 
 /* --- Media Queries --- */
 @media screen and (max-width: 480px) {

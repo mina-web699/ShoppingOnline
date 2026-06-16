@@ -40,8 +40,15 @@ const cartItemsContainer = document.getElementById('cart-items-container');
 const cartCountBadge = document.getElementById('cart-count');
 const checkoutButtons = document.querySelectorAll('.checkout-btn');
 
+// نظام أمان وحماية السلة وتخزينها
+let cart = [];
+try {
+    cart = JSON.parse(localStorage.getItem("cartData")) || [];
+    if (!Array.isArray(cart)) cart = [];
+} catch (e) {
+    cart = [];
+}
 
-let cart = []; 
 let clickCount = 0; 
 let resetClickTimeout;
 
@@ -61,6 +68,7 @@ function showToast(message, isSuccess = true) {
 document.addEventListener("DOMContentLoaded", () => {
     renderStoreProducts();
     initCartSystem();
+    updateCartUI();
 });
 
 // --- Render Store Products ---
@@ -139,7 +147,7 @@ function initCartSystem() {
                 return;
             }
             
-            const myPhoneNumber = "201148705202"; 
+            const myPhoneNumber = "201234567890"; 
             let message = "مرحباً، أود شراء المنتجات التالية من متجرك:\n\n";
             
             cart.forEach((item, index) => {
@@ -171,8 +179,16 @@ function addToCart(product) {
         cart.push({ ...product, quantity: 1 });
     }
     
+    localStorage.setItem("cartData", JSON.stringify(cart));
     updateCartUI();
     showToast(`تم إضافة ${product.name} إلى السلة 🛒`, true);
+}
+
+function removeFromCart(productName) {
+    cart = cart.filter(item => item.name !== productName);
+    localStorage.setItem("cartData", JSON.stringify(cart));
+    updateCartUI();
+    showToast("تم إزالة المنتج من السلة", false);
 }
 
 function updateCartUI() {
@@ -194,6 +210,10 @@ function updateCartUI() {
         itemRow.innerHTML = `
             <span class="cart-item-name">${item.name}</span>
             <span class="cart-item-qty">x${item.quantity}</span>
+            <span class="cart-item-price">${item.price * item.quantity}$</span>
+            <button class="remove-item-btn" onclick="removeFromCart('${item.name}')">
+                <i class="fas fa-trash-alt"></i>
+            </button>
         `;
         cartItemsContainer.append(itemRow);
     });
@@ -214,7 +234,7 @@ if (secretTrigger && authModal) {
             passwordInput.focus(); 
         }
         
-        resetClickTimeout = setTimeout(() => { clickCount = 0; }, 500);
+        resetClickTimeout = setTimeout(() => { clickCount = 0; }, 2000);
     });
 }
 
