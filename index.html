@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">
+    <title>Online Store</title>
+</head>
+
+<body>
+    <header>
+        <h1>Shoping <span>Online</span></h1>
+        <nav>
+            <a href="#our-pro">Products</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <div class="cart-bar">
+        <div class="cart-bar-content">
+            <a href="#cart" class="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cart-count">0</span>
+            </a>
+            <button class="checkout-btn">Checkout <i class="fab fa-whatsapp"></i></button>
+        </div>
+    </div>
+
+    <div id="cart-modal" class="cart-modal">
+        <div class="cart-modal-content">
+            <div class="cart-modal-header">
+                <h2>Your Cart <i class="fas fa-shopping-bag"></i></h2>
+                <button id="close-cart-btn">&times;</button>
+            </div>
+
+            <div id="cart-items-container">
+                <p class="empty-cart-text">Your cart is empty!</p>
+            </div>
+
+            <div class="cart-modal-footer">
+                <button class="checkout-btn modal-checkout">Checkout via WhatsApp <i
+                        class="fab fa-whatsapp"></i></button>
+            </div>
+        </div>
+    </div>
+    
+    <main>
+        <section class="admin-panel">
+            <h2>Add New Product <i class="fas fa-plus-circle"></i></h2>
+            <form id="add-product-form">
+                <input type="text" id="admin-pro-name" placeholder="Product Name (e.g., Apple Watch)" required>
+                <input type="text" id="admin-pro-desc" placeholder="Product Description..." required>
+                <input type="number" id="admin-pro-price" placeholder="Price in $ (e.g., 24.00)" step="0.01" required>
+                <input type="url" id="admin-pro-img" placeholder="Image URL (Link)..." required>
+                <button type="submit" class="buy-btn">Publish Product</button>
+            </form>
+        </section>
+
+        <section class="card-content" id="our-pro"></section>
+
+        <section class="about-container" id="about">
+            <h2>About <span>Us</span></h2>
+            <p class="about-subtitle">We provide the best smart gadgets with high quality and premium neon style.</p>
+            
+            <div class="about-features">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-shipping-fast"></i></div>
+                    <h3>Fast Delivery</h3>
+                    <p>Super fast delivery straight to your doorstep within 24-48 hours maximum.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-ribbon"></i></div>
+                    <h3>Original Products</h3>
+                    <p>100% genuine and original smartwatches with official brand warranty.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-headset"></i></div>
+                    <h3>24/7 Support</h3>
+                    <p>Direct contact with the owner via WhatsApp anytime to help with your orders.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="contact-container" id="contact">
+            <h2>Connect With <span>Us</span></h2>
+            <div class="contact-content">
+                <a href="https://facebook.com" target="_blank" class="social-icon-btn facebook" title="Facebook"><i
+                        class="fab fa-facebook-f"></i></a>
+                <a href="https://instagram.com" target="_blank" class="social-icon-btn instagram"
+                    title="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://wa.me/123456789" target="_blank" class="social-icon-btn whatsapp"
+                    title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                <a href="mailto:info@shopeonline.com" class="social-icon-btn email" title="Email"><i
+                        class="far fa-envelope"></i></a>
+            </div>
+        </section>
+
+        <div id="admin-auth-modal" class="auth-modal" style="display: none;">
+            <div class="auth-modal-content">
+                <h3>Admin Access <i class="fas fa-lock"></i></h3>
+                <p>Enter password to unlock admin panel:</p>
+                <input type="password" id="admin-secret-pass" placeholder="••••">
+                <div class="auth-modal-btns">
+                    <button id="cancel-auth-btn">Cancel</button>
+                    <button id="confirm-auth-btn">Unlock</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="custom-toast" class="toast"></div>
+        
+    </main>
+
+    <footer class="foot-container">
+        <div class="foot-content">
+            <h3>Get In Touch With Owner</h3>
+            <div class="owner-links">
+                <a href="https://wa.me/201234567890" target="_blank" class="foot-icon-link" title="Chat via WhatsApp"><i
+                        class="fab fa-whatsapp"></i></a>
+                <a href="mailto:sihamaged9@gmail.com" class="foot-icon-link" title="Send an Email"><i
+                        class="far fa-envelope"></i></a>
+            </div>
+            <hr class="foot-divider">
+            <p class="copy-text">&copy; 2026 Shope Online. All Rights Reserved.</p>
+            <p class="dev-text">Made with <i class="fas fa-heart text-neon"></i> by <span>Mina Maged</span></p>
+        </div>
+    </footer>
+    <script src="./script.js"></script>
+</body>
+
+</html>
