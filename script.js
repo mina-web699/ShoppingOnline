@@ -140,10 +140,31 @@ async function initStoreSystem() {
         document.getElementById('custom-confirm-modal').style.display = 'flex';
     };
 
-    // التحكم بنظام الحماية السري للأدمن
+// ==================== نظام الـ 3 ضغطات السريعة لفتح اللوحة ====================
+    let clickCount = 0;
+    let lastClickTime = 0;
+
     if (secretTrigger) {
-        secretTrigger.addEventListener('click', () => { authModal.style.display = 'flex'; passwordInput.focus(); });
+        secretTrigger.addEventListener('click', () => {
+            const currentTime = new Date().getTime();
+            
+          
+            if (currentTime - lastClickTime > 400) {
+                clickCount = 0;
+            }
+            
+            clickCount++;
+            lastClickTime = currentTime; 
+
+          
+            if (clickCount === 3) {
+                authModal.style.display = 'flex'; 
+                passwordInput.focus();
+                clickCount = 0; 
+            }
+        });
     }
+
     if (cancelAuthBtn) {
         cancelAuthBtn.addEventListener('click', () => { authModal.style.display = 'none'; passwordInput.value = ''; });
     }
