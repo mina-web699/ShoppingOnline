@@ -6,29 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./style.css">
-   <title>Online Shopping | Premium  Store</title>
-   
-   <meta name="description" content="Discover the art of modern dressing. Explore our premium collection of finely crafted clothing designed to elevate your everyday style with timeless elegance.">
-    <meta name="keywords" content="luxury fashion, premium clothing brand, elegant outfits, designer wear, modern wardrobe, high-end apparel, chic style, luxury streetwear, براند ملابس, أزياء راقية, ملابس شيك, براند ملابس فاخر, أحدث صيحات الموضة, كولكشن جديد">
-<meta name="author" content="Mina Maged">
+    <title>Online Shopping | Premium Store</title>
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Shoping Online | Premium  Store">
-<meta property="og:description" content="Discover the best smart gadgets with high quality and premium neon style. Made by Mina Maged.">
-<meta property="og:image" content="https://i.pinimg.com/736x/e5/a9/61/e5a961db9ffc2c1ec1e89a573c2c0a3f.jpg">
- <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Shoping Online | Premium Smartwatch Store">
-<meta name="twitter:description" content="Discover the best smart gadgets with high quality and premium neon style.">
-<meta name="twitter:image" content="https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=500">
+    <meta name="description"
+        content="Discover the art of modern dressing. Explore our premium collection of finely crafted clothing designed to elevate your everyday style with timeless elegance.">
+    <meta name="keywords"
+        content="luxury fashion, premium clothing brand, elegant outfits, designer wear, modern wardrobe, high-end apparel, chic style, luxury streetwear">
+    <meta name="author" content="Mina Maged">
+
+    <script type="module" src="https://unpkg.com/ionicons@7.10.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.10.0/dist/ionicons/ionicons.js"></script>
 </head>
 
 <body>
     <header>
-        <h1>Online <span> Shopping </span></h1>
+        <h1>Online <span id="secret-admin-trigger" style="cursor: pointer;"> Shopping </span></h1>
         <nav>
             <a href="#our-pro">Products</a>
             <a href="#about">About</a>
             <a href="#contact">Contact</a>
+            <a href="#" id="openCalcBtn" class="nav-calc-btn" title="حاسبة السعرات">
+                <ion-icon name="calculator-outline"></ion-icon>
+            </a>
         </nav>
     </header>
 
@@ -38,7 +37,7 @@
                 <i class="fas fa-shopping-cart"></i>
                 <span id="cart-count">0</span>
             </a>
-            <button class="checkout-btn">Checkout <i class="fab fa-whatsapp"></i></button>
+            <button class="checkout-btn header-checkout-btn">Checkout <i class="fab fa-whatsapp"></i></button>
         </div>
     </div>
 
@@ -59,7 +58,7 @@
             </div>
         </div>
     </div>
-    
+
     <main>
         <section class="admin-panel">
             <h2>Add New Product <i class="fas fa-plus-circle"></i></h2>
@@ -77,20 +76,20 @@
         <section class="about-container" id="about">
             <h2>About <span>Us</span></h2>
             <p class="about-subtitle">We provide the best smart gadgets with high quality and premium neon style.</p>
-            
+
             <div class="about-features">
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-shipping-fast"></i></div>
                     <h3>Fast Delivery</h3>
                     <p>Super fast delivery straight to your doorstep within 24-48 hours maximum.</p>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-ribbon"></i></div>
                     <h3>Original Products</h3>
                     <p>100% genuine and original smartwatches with official brand warranty.</p>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-headset"></i></div>
                     <h3>24/7 Support</h3>
@@ -104,11 +103,11 @@
             <div class="contact-content">
                 <a href="https://facebook.com" target="_blank" class="social-icon-btn facebook" title="Facebook"><i
                         class="fab fa-facebook-f"></i></a>
-                <a href="https://instagram.com" target="_blank" class="social-icon-btn instagram"
-                    title="Instagram"><i class="fab fa-instagram"></i></a>
-                <a href="https://wa.me/123456789" target="_blank" class="social-icon-btn whatsapp"
+                <a href="https://instagram.com" target="_blank" class="social-icon-btn instagram" title="Instagram"><i
+                        class="fab fa-instagram"></i></a>
+                <a href="https://wa.me/201148705202" target="_blank" class="social-icon-btn whatsapp"
                     title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-                <a href="mailto:info@shopeonline.com" class="social-icon-btn email" title="Email"><i
+                <a href="mailto:sihamaged9@gmail.com" class="social-icon-btn email" title="Email"><i
                         class="far fa-envelope"></i></a>
             </div>
         </section>
@@ -126,7 +125,6 @@
         </div>
 
         <div id="custom-toast" class="toast"></div>
-        
     </main>
 
     <footer class="foot-container">
@@ -139,13 +137,10 @@
                         class="far fa-envelope"></i></a>
             </div>
             <hr class="foot-divider">
-            <p class="copy-text">&copy; 2026 Shope Online. All Rights Reserved.</p>
+            <p class="copy-text">&copy; 2026 Shop Online. All Rights Reserved.</p>
             <p class="dev-text">Made with <i class="fas fa-heart text-neon"></i> by <span>Mina Maged</span></p>
         </div>
     </footer>
-    
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
 
     <script src="./script.js"></script>
 </body>
