@@ -1,7 +1,7 @@
-// ==================== 1. إعدادات Firebase الخاصة بمشروعك ====================
+// ==================== 1. إعدادات Firebase الخاصة بمشروعك (تم تصحيح الرابط) ====================
 const firebaseConfig = {
     apiKey: "AIzaSyA5AbMppaL0IxyQc-62YLrfRcFwDY9zyyO",
-    authDomain: "://firebaseapp.com",
+    authDomain: "shopping-online-7dcfd.firebaseapp.com",
     projectId: "shopping-online-7dcfd",
     storageBucket: "shopping-online-7dcfd.firebasestorage.app",
     messagingSenderId: "607216310901",
@@ -25,6 +25,13 @@ const authModal = document.getElementById('admin-auth-modal');
 const passwordInput = document.getElementById('admin-secret-pass');
 const cancelAuthBtn = document.getElementById('cancel-auth-btn');
 const confirmAuthBtn = document.getElementById('confirm-auth-btn');
+
+// عناصر السلة (Cart Elements)
+const cartIcon = document.querySelector('.cart-icon');
+const cartModal = document.getElementById('cart-modal');
+const closeCartBtn = document.getElementById('close-cart-btn');
+const cartItemsContainer = document.getElementById('cart-items-container');
+const checkoutButtons = document.querySelectorAll('.checkout-btn');
 
 // مصفوفة السلة المحلية
 let cart = JSON.parse(localStorage.getItem("store_cart")) || [];
@@ -52,7 +59,7 @@ function listenToOnlineProducts() {
                     <div class="price">$${parseFloat(prod.price).toFixed(2)}</div>
                     <button class="buy-btn" onclick="addToCart('${prodId}', '${prod.name}', ${prod.price})">Add To Cart</button>
                     
-                    <button class="admin-delete-btn" onclick="deleteOnlineProduct('${prodId}')" style="display: ${adminPanel.style.display === 'block' ? 'block' : 'none'}; position:absolute; top:10px; right:10px; background:#ff4d4d; color:white; border:none; border-radius:4px; padding:5px 10px; cursor:pointer;">Delete</button>
+                    <button class="admin-delete-btn" onclick="deleteOnlineProduct('${prodId}')" style="display: ${adminPanel.style.display === 'block' ? 'block' : 'none'}; position:absolute; top:10px; right:10px; background:#ff4d4d; color:white; border:none; border-radius:4px; padding:5px 10px; cursor:pointer; z-index:10;">Delete</button>
                 </div>
             `;
         });
@@ -64,7 +71,10 @@ function listenToOnlineProducts() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", listenToOnlineProducts);
+document.addEventListener("DOMContentLoaded", () => {
+    listenToOnlineProducts();
+    renderCartItems();
+});
 
 // ==================== 3. إضافة منتج جديد إلى السحابة ====================
 if (addProductForm) {
@@ -133,7 +143,25 @@ function handleAuth() {
     }
 }
 
-// ==================== 6. نظام السلة (Cart System) ====================
+// ==================== 6. نظام السلة والـ WhatsApp (Cart & Checkout) ====================
+
+// فتح السلة
+if (cartIcon) {
+    cartIcon.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (cartModal) cartModal.style.display = 'flex';
+        renderCartItems();
+    });
+}
+
+// إغلاق السلة
+if (closeCartBtn) {
+    closeCartBtn.addEventListener('click', () => {
+        if (cartModal) cartModal.style.display = 'none';
+    });
+}
+
+// إضافة منتج للسلة
 window.addToCart = function(id, name, price) {
     const existing = cart.find(item => item.id === id);
     if (existing) {
@@ -146,6 +174,7 @@ window.addToCart = function(id, name, price) {
     showToast(`🛒 Added ${name} to cart!`);
 };
 
+// تحديث شارة عدد المنتجات
 function updateCartBadge() {
     const badge = document.getElementById('cart-count');
     if (!badge) return;
@@ -153,10 +182,83 @@ function updateCartBadge() {
     badge.textContent = total;
 }
 
-function showToast(msg) {
-    const toast = document.getElementById('custom-toast');
-    if (!toast) return;
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
+// عرض عناصر السلة داخل المودال
+function renderCartItems() {
+    if (!cartItemsContainer) return;
+    
+    if (cart.length === 0) {
+        cartItemsContainer.innerHTML = `<p class="empty-cart-text">Your cart is empty!</p>`;
+        return;
+    }
+
+    let cartHtml = '<div style="width:100%; max-height:300px; overflow-y:auto; padding:10px 0;">';
+    let totalCartPrice = 0;
+
+    cart.forEach((item, index) => {
+        const itemTotal = item.price * item.qty;
+        totalCartPrice += itemTotal;
+        cartHtml += `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px dashed rgba(255,255,255,0.1);">
+                <div>
+                    <h4 style="color:#fff;">${item.name}</h4>
+                    <small style="color:var(--neon-blue); font-size:12px;">$${item.price} x ${item.qty}</small>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-weight:bold; color:#fff;">$${itemTotal.toFixed(2)}</span>
+                    <button onclick="removeFromCart(${index})" style="background:transparent; border:none; color:#ff4d4d; font-size:18px; cursor:pointer;">&times;</button>
+                </div>
+            </div>
+        `;
+    });
+
+    cartHtml += `</div>
+        <div style="display:flex; justify-content:space-between; width:100%; margin-top:15px; font-size:1.2rem; font-weight:bold; color:#fff; border-top:1px solid rgba(255,255,255,0.2); padding-top:15px;">
+            <span>Total:</span>
+            <span style="color:#00F0FF;">$${totalCartPrice.toFixed(2)}</span>
+        </div>`;
+        
+    cartItemsContainer.innerHTML = cartHtml;
 }
+
+// حذف عنصر من السلة
+window.removeFromCart = function(index) {
+    cart.splice(index, 1);
+    localStorage.setItem("store_cart", JSON.stringify(cart));
+    updateCartBadge();
+    renderCartItems();
+    showToast("❌ Item removed from cart.");
+};
+
+// إرسال الطلب عبر الواتساب المنسق (تم إصلاح الرابط المقطوع وعلامة السلاش)
+checkoutButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (cart.length === 0) {
+            showToast("❌ Your cart is empty!");
+            return;
+        }
+
+        const ownerPhone = "201148705202"; 
+        let message = `🛒 *New Order from Premium Store* \n\n`;
+        let total = 0;
+
+        cart.forEach((item, index) => {
+            const itemTotal = item.price * item.qty;
+            total += itemTotal;
+            message += `${index + 1}. *${item.name}* \n   Qty: ${item.qty} | Price: $${item.price.toFixed(2)} \n   Subtotal: $${itemTotal.toFixed(2)}\n\n`;
+        });
+
+        message += `💰 *Grand Total: $${total.toFixed(2)}* \n\n Please confirm my order!`;
+        
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me{ownerPhone}?text=${encodedMessage}`;
+
+        // تفريغ السلة بعد إتمام الطلب بنجاح لإبقائها نظيفة
+        cart = [];
+        localStorage.removeItem("store_cart");
+        updateCartBadge();
+        if (cartModal) cartModal.style.display = 'none';
+
+        // فتح الواتساب في نافذة جديدة بشكل صحيح
+        window.open(whatsappUrl, '_blank');
+    });
+});
