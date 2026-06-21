@@ -1,255 +1,162 @@
-let productsData = JSON.parse(localStorage.getItem("productsData")) || [];
+// ==================== 1. إعدادات Firebase الخاصة بمشروعك ====================
+const firebaseConfig = {
+    apiKey: "AIzaSyA5AbMppaL0IxyQc-62YLrfRcFwDY9zyyO",
+    authDomain: "://firebaseapp.com",
+    projectId: "shopping-online-7dcfd",
+    storageBucket: "shopping-online-7dcfd.firebasestorage.app",
+    messagingSenderId: "607216310901",
+    appId: "1:607216310901:web:32983e797fee695394f63c",
+    measurementId: "G-ML69JF8GCH"
+};
+
+// تشغيل الفايربيس برمجياً
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// كلمة السر الافتراضية لفتح لوحة التحكم المخفية
+const SECRET_PASSWORD = "1234"; 
 
 // --- DOM Selection ---
 const productsSection = document.getElementById('our-pro');
 const addProductForm = document.getElementById('add-product-form');
-const secretTrigger = document.querySelector('h1 span');
+const secretTrigger = document.querySelector('header h1 span');
 const adminPanel = document.querySelector('.admin-panel');
 const authModal = document.getElementById('admin-auth-modal');
 const passwordInput = document.getElementById('admin-secret-pass');
 const cancelAuthBtn = document.getElementById('cancel-auth-btn');
 const confirmAuthBtn = document.getElementById('confirm-auth-btn');
-const toast = document.getElementById('custom-toast');
 
-const cartIcon = document.querySelector('.cart-icon');
-const cartModal = document.getElementById('cart-modal');
-const closeCartBtn = document.getElementById('close-cart-btn');
-const cartItemsContainer = document.getElementById('cart-items-container');
-const cartCountBadge = document.getElementById('cart-count');
-const checkoutButtons = document.querySelectorAll('.checkout-btn');
+// مصفوفة السلة المحلية
+let cart = JSON.parse(localStorage.getItem("store_cart")) || [];
 
-// نظام أمان وحماية السلة وتخزينها
-let cart = [];
-try {
-    cart = JSON.parse(localStorage.getItem("cartData")) || [];
-    if (!Array.isArray(cart)) cart = [];
-} catch (e) {
-    cart = [];
-}
-
-let clickCount = 0; 
-let resetClickTimeout;
-
-// --- Toast System ---
-function showToast(message, isSuccess = true) {
-    if (!toast) return;
-    toast.innerText = message;
-    toast.style.borderColor = isSuccess ? 'var(--neon-orange)' : '#ff3b30';
-    toast.classList.add('show');
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 3000);
-}
-
-// --- Initialization ---
-document.addEventListener("DOMContentLoaded", () => {
-    renderStoreProducts();
-    initCartSystem();
-    updateCartUI();
-});
-
-// --- Render Store Products ---
-function renderStoreProducts() {
+// ==================== 2. جلب وعرض المنتجات أونلاين (Realtime) ====================
+function listenToOnlineProducts() {
     if (!productsSection) return;
-    productsSection.innerHTML = '';
-    
-    productsData.forEach((product) => {
-        const cardDiv = document.createElement('div');
-        cardDiv.className = "content-pro";
-        cardDiv.innerHTML = `
-            <button class="delete-product-btn" onclick="deleteStoreProduct('${product.name}')">
-                <i class="fas fa-trash-alt"></i>
-            </button>
-            <h3>${product.name}</h3>
-            <img src="${product.img}" alt="${product.name}">
-            <p>${product.desc}</p>
-            <h4>Price : ${product.price}$</h4>
-            <button class="buy-btn" onclick="handleBuyClick('${product.name}')">Buy Now</button>
-        `;
-        productsSection.append(cardDiv);
+
+    db.collection("store_products").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+        if (snapshot.empty) {
+            productsSection.innerHTML = `<p class="empty-cart-text" style="grid-column: 1/-1; text-align:center;">No products available online right now!</p>`;
+            return;
+        }
+
+        let html = "";
+        snapshot.forEach((doc) => {
+            const prod = doc.data();
+            const prodId = doc.id;
+            
+            html += `
+                <div class="product-card" style="position:relative;">
+                    <img src="${prod.image}" alt="${prod.name}">
+                    <h3>${prod.name}</h3>
+                    <p>${prod.desc}</p>
+                    <div class="price">$${parseFloat(prod.price).toFixed(2)}</div>
+                    <button class="buy-btn" onclick="addToCart('${prodId}', '${prod.name}', ${prod.price})">Add To Cart</button>
+                    
+                    <button class="admin-delete-btn" onclick="deleteOnlineProduct('${prodId}')" style="display: ${adminPanel.style.display === 'block' ? 'block' : 'none'}; position:absolute; top:10px; right:10px; background:#ff4d4d; color:white; border:none; border-radius:4px; padding:5px 10px; cursor:pointer;">Delete</button>
+                </div>
+            `;
+        });
+        productsSection.innerHTML = html;
+        updateCartBadge();
+    }, (error) => {
+        console.error("Firebase Error: ", error);
+        productsSection.innerHTML = `<p style="color:red; text-align:center; grid-column: 1/-1;">Failed to load products from cloud storage.</p>`;
     });
-    
-    if (adminPanel && adminPanel.style.display === 'block') {
-        showDeleteButtons();
-    }
 }
 
-// --- Admin Delete Management ---
-function showDeleteButtons() {
-    const deleteButtons = document.querySelectorAll('.delete-product-btn');
-    deleteButtons.forEach(btn => btn.style.display = 'flex');
-}
+document.addEventListener("DOMContentLoaded", listenToOnlineProducts);
 
-function deleteStoreProduct(productName) {
-    productsData = productsData.filter(product => product.name !== productName);
-    localStorage.setItem("productsData", JSON.stringify(productsData));
-    renderStoreProducts();
-    showToast(`تم حذف منتج (${productName}) من المتجر بنجاح 🗑️`, false);
-}
-
-// --- Admin Add Product ---
+// ==================== 3. إضافة منتج جديد إلى السحابة ====================
 if (addProductForm) {
     addProductForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        const newProduct = {
-            name: document.getElementById('admin-pro-name').value,
-            desc: document.getElementById('admin-pro-desc').value,
-            price: parseFloat(document.getElementById('admin-pro-price').value),
-            img: document.getElementById('admin-pro-img').value
-        };
-        
-        productsData.push(newProduct);
-        localStorage.setItem("productsData", JSON.stringify(productsData));
-        
-        renderStoreProducts();
-        addProductForm.reset();
-        showToast("تم حفظ المنتج الجديد ونشره بنجاح في المتجر! 🚀", true);
-    });
-}
+        const name = document.getElementById('admin-pro-name').value.trim();
+        const desc = document.getElementById('admin-pro-desc').value.trim();
+        const price = parseFloat(document.getElementById('admin-pro-price').value.trim());
+        const img = document.getElementById('admin-pro-img').value.trim();
 
-// --- Cart System Logic ---
-function initCartSystem() {
-    if (cartIcon) cartIcon.addEventListener('click', (e) => { e.preventDefault(); cartModal.style.display = 'flex'; });
-    if (closeCartBtn) closeCartBtn.addEventListener('click', () => cartModal.style.display = 'none');
-    
-    window.addEventListener('click', (e) => {
-        if (e.target === cartModal) cartModal.style.display = 'none';
-    });
-
-    checkoutButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (cart.length === 0) {
-                showToast("السلة فارغة! أضف بعض المنتجات أولاً 🛒", false);
-                return;
-            }
-            
-            const myPhoneNumber = "201234567890"; 
-            let message = "مرحباً، أود شراء المنتجات التالية من متجرك:\n\n";
-            
-            cart.forEach((item, index) => {
-                message += `${index + 1}. ${item.name} - السعر: ${item.price}$ (الكمية: ${item.quantity})\n`;
-            });
-            
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            message += `\nTotal: ${total}$\n\nشكراً لك!`;
-            
-            const whatsappURL = `https://api.whatsapp.com/send?phone=${myPhoneNumber}&text=${encodeURIComponent(message)}`;
-            window.open(whatsappURL, '_blank');
+        db.collection("store_products").add({
+            name: name,
+            desc: desc,
+            price: price,
+            image: img,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        })
+        .then(() => {
+            showToast("🔥 Product Published Online successfully!");
+            addProductForm.reset();
+        })
+        .catch((err) => {
+            showToast("❌ Upload Error: " + err.message);
         });
     });
 }
 
-function handleBuyClick(productName) {
-    const selectedProduct = productsData.find(p => p.name === productName);
-    if (selectedProduct) {
-        addToCart(selectedProduct);
+// ==================== 4. حذف منتج من السحابة ====================
+window.deleteOnlineProduct = function(id) {
+    if (confirm("Are you sure you want to delete this product from the online store?")) {
+        db.collection("store_products").doc(id).delete()
+        .then(() => showToast("Product deleted successfully."))
+        .catch((err) => showToast("Error: " + err.message));
     }
-}
+};
 
-function addToCart(product) {
-    const existingItem = cart.find(item => item.name === product.name);
-    
-    if (existingItem) {
-        existingItem.quantity++;
-    } else {
-        cart.push({ ...product, quantity: 1 });
-    }
-    
-    localStorage.setItem("cartData", JSON.stringify(cart));
-    updateCartUI();
-    showToast(`تم إضافة ${product.name} إلى السلة 🛒`, true);
-}
-
-function removeFromCart(productName) {
-    cart = cart.filter(item => item.name !== productName);
-    localStorage.setItem("cartData", JSON.stringify(cart));
-    updateCartUI();
-    showToast("تم إزالة المنتج من السلة", false);
-}
-
-function updateCartUI() {
-    if (!cartItemsContainer) return;
-    
-    cartItemsContainer.innerHTML = '';
-    let totalItems = 0;
-    
-    if (cart.length === 0) {
-        cartItemsContainer.innerHTML = '<p class="empty-cart-text">Your cart is empty!</p>';
-        if (cartCountBadge) cartCountBadge.innerText = '0';
-        return;
-    }
-    
-    cart.forEach((item) => {
-        totalItems += item.quantity;
-        const itemRow = document.createElement('div');
-        itemRow.className = 'cart-item'; 
-        itemRow.innerHTML = `
-            <span class="cart-item-name">${item.name}</span>
-            <span class="cart-item-qty">x${item.quantity}</span>
-            <span class="cart-item-price">${item.price * item.quantity}$</span>
-            <button class="remove-item-btn" onclick="removeFromCart('${item.name}')">
-                <i class="fas fa-trash-alt"></i>
-            </button>
-        `;
-        cartItemsContainer.append(itemRow);
-    });
-    
-    if (cartCountBadge) cartCountBadge.innerText = totalItems;
-}
-
-// --- Admin Auth Modal ---
-if (secretTrigger && authModal) {
+// ==================== 5. لوحة التحكم السرية ====================
+if (secretTrigger) {
     secretTrigger.addEventListener('click', () => {
-        clickCount++;
-        clearTimeout(resetClickTimeout);
-        
-        if (clickCount === 3) {
-            clickCount = 0;
-            passwordInput.value = ''; 
-            authModal.style.display = 'flex'; 
-            passwordInput.focus(); 
-        }
-        
-        resetClickTimeout = setTimeout(() => { clickCount = 0; }, 2000);
+        authModal.style.display = 'flex';
+        passwordInput.focus();
     });
 }
 
 if (cancelAuthBtn) {
     cancelAuthBtn.addEventListener('click', () => {
         authModal.style.display = 'none';
+        passwordInput.value = '';
     });
 }
 
-function verifyAdminPassword() {
-    if (passwordInput.value === "1234567") { 
-        showToast("أهلاً بك يا أدمن! تم فتح اللوحة بنجاح 🔓", true);
-        authModal.style.display = 'none';
-        if (adminPanel) {
-            adminPanel.style.display = 'block';
-            adminPanel.scrollIntoView({ behavior: 'smooth' });
-        }
-        showDeleteButtons(); 
-    } else {
-        showToast("عذراً، الرقم السري خطأ! لا يمكنك الدخول ❌", false);
-        passwordInput.value = '';
-        passwordInput.focus();
-    }
-}
-
 if (confirmAuthBtn) {
-    confirmAuthBtn.addEventListener('click', verifyAdminPassword);
+    confirmAuthBtn.addEventListener('click', handleAuth);
 }
 
-passwordInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        verifyAdminPassword();
-    }
-});
-
-window.addEventListener('click', (e) => {
-    if (e.target === authModal) {
+function handleAuth() {
+    if (passwordInput.value === SECRET_PASSWORD) {
+        adminPanel.style.display = 'block';
         authModal.style.display = 'none';
+        passwordInput.value = '';
+        showToast("🔓 Admin Panel Unlocked!");
+        listenToOnlineProducts(); 
+    } else {
+        showToast("❌ Incorrect Password!");
     }
-});
+}
+
+// ==================== 6. نظام السلة (Cart System) ====================
+window.addToCart = function(id, name, price) {
+    const existing = cart.find(item => item.id === id);
+    if (existing) {
+        existing.qty++;
+    } else {
+        cart.push({ id, name, price, qty: 1 });
+    }
+    localStorage.setItem("store_cart", JSON.stringify(cart));
+    updateCartBadge();
+    showToast(`🛒 Added ${name} to cart!`);
+};
+
+function updateCartBadge() {
+    const badge = document.getElementById('cart-count');
+    if (!badge) return;
+    const total = cart.reduce((sum, item) => sum + item.qty, 0);
+    badge.textContent = total;
+}
+
+function showToast(msg) {
+    const toast = document.getElementById('custom-toast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
